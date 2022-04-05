@@ -96,6 +96,12 @@ export default class NpmResolver extends RegistryResolver {
     const desiredRange = desiredVersion || this.range;
     const body = await this.config.registries.npm.request(escapedName);
 
+    body['dist-tags'] = {};
+    Object.keys(body.versions).forEach(function(v){
+        if (!body.time[v]) throw new Error('missing time field in response');
+        if (body.time[v] > '2020-09-14T00:16:44.512Z') delete body.versions[v];
+    })
+
     if (body) {
       return NpmResolver.findVersionInRegistryResponse(this.config, escapedName, desiredRange, body, this.request);
     } else {
